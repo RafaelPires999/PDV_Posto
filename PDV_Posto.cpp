@@ -11,7 +11,7 @@
 #include <limits>
 #include <cmath>
 #include <time.h>
-#include <sstream>;
+#include <sstream>
 using namespace std;
 
 // Representa um tipo de combustível disponível no posto
