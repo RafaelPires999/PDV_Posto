@@ -4,7 +4,7 @@
 #include <cctype>
 #include <iomanip>
 #include <algorithm>
-#include <fstream>
+#include <cstdio>
 #include <clocale>
 #include <locale>
 #include <map>
@@ -230,45 +230,47 @@ void ImprimirDataHoraAtual() {
 
 // Salva os dados dos combustíveis no arquivo binário
 void SalvarCombustiveis(const vector<Combustivel>& combustiveis) {
-    ofstream arquivo("combustiveis.dat", ios::binary | ios::trunc);
-    if (!arquivo.is_open()) {
-        cout << "Erro crítico: Não foi possível abrir o arquivo para salvar os dados.\n";
+    FILE* arquivo = nullptr;
+    if (fopen_s(&arquivo, "Combustiveis.dat", "wb") != 0 || arquivo == nullptr) {
+        cout << "Não foi possível abrir arquivo\n\n";
         system("pause");
         return;
     }
+
     size_t tamanho = combustiveis.size();
-    arquivo.write(reinterpret_cast<const char*>(&tamanho), sizeof(tamanho));
+    fwrite(&tamanho, sizeof(size_t), 1, arquivo);
     for (const auto& c : combustiveis) {
         size_t nomeLen = c.nome.size();
-        arquivo.write(reinterpret_cast<const char*>(&nomeLen), sizeof(nomeLen));
-        arquivo.write(c.nome.c_str(), nomeLen);
-        arquivo.write(reinterpret_cast<const char*>(&c.precoPorLitro), sizeof(c.precoPorLitro));
-        arquivo.write(reinterpret_cast<const char*>(&c.estoqueLitros), sizeof(c.estoqueLitros));
-        arquivo.write(reinterpret_cast<const char*>(&c.capacidadeTanque), sizeof(c.capacidadeTanque));
+        fwrite(&nomeLen, sizeof(size_t), 1, arquivo);
+        fwrite(c.nome.c_str(), sizeof(char), nomeLen, arquivo);
+        fwrite(&c.precoPorLitro, sizeof(double), 1, arquivo);
+        fwrite(&c.estoqueLitros, sizeof(double), 1, arquivo);
+        fwrite(&c.capacidadeTanque, sizeof(double), 1, arquivo);
     }
-    arquivo.close();
+    fclose(arquivo);
 }
 
 // Carrega os dados dos combustíveis do arquivo binário
 void CarregarCombustiveis(vector<Combustivel>& combustiveis) {
-    ifstream arquivo("combustiveis.dat", ios::binary);
-    if (!arquivo.is_open()) {
+    FILE* arquivo = nullptr;
+    if (fopen_s(&arquivo, "Combustiveis.dat", "rb") != 0 || arquivo == nullptr) {
         return;
     }
+
     size_t tamanho = 0;
-    arquivo.read(reinterpret_cast<char*>(&tamanho), sizeof(tamanho));
-    for (size_t i = 0; i < tamanho; ++i) {
+    fread(&tamanho, sizeof(size_t), 1, arquivo);
+    for (size_t i = 0; i < tamanho; i++) {
         Combustivel c;
         size_t nomeLen = 0;
-        arquivo.read(reinterpret_cast<char*>(&nomeLen), sizeof(nomeLen));
+        fread(&nomeLen, sizeof(size_t), 1, arquivo);
         c.nome.resize(nomeLen);
-        arquivo.read(&c.nome[0], nomeLen);
-        arquivo.read(reinterpret_cast<char*>(&c.precoPorLitro), sizeof(c.precoPorLitro));
-        arquivo.read(reinterpret_cast<char*>(&c.estoqueLitros), sizeof(c.estoqueLitros));
-        arquivo.read(reinterpret_cast<char*>(&c.capacidadeTanque), sizeof(c.capacidadeTanque));
+        fread(&c.nome[0], sizeof(char), nomeLen, arquivo);
+        fread(&c.precoPorLitro, sizeof(double), 1, arquivo);
+        fread(&c.estoqueLitros, sizeof(double), 1, arquivo);
+        fread(&c.capacidadeTanque, sizeof(double), 1, arquivo);
         combustiveis.push_back(c);
     }
-    arquivo.close();
+    fclose(arquivo);
 }
 
 // Menu de gerenciamento de combustíveis
@@ -517,45 +519,47 @@ void GerenciamentoConveniencia(vector<ProdutoLoja> &produto) {
 
 // Carrega os produtos da loja do arquivo binário
 void CarregarProduto(vector<ProdutoLoja>& produto) {
-    ifstream arquivo("Produtos.dat", ios::binary);
-    if (!arquivo.is_open()) {
+    FILE* arquivo = nullptr;
+    if (fopen_s(&arquivo, "Produtos.dat", "rb") != 0 || arquivo == nullptr) {
         return;
     }
+
     size_t tamanho = 0;
-    arquivo.read(reinterpret_cast<char*>(&tamanho), sizeof(tamanho));
+    fread(&tamanho, sizeof(size_t), 1, arquivo);
     for (size_t i = 0; i < tamanho; i++) {
         ProdutoLoja p;
-        arquivo.read(reinterpret_cast<char*>(&p.id), sizeof(p.id));
+        fread(&p.id, sizeof(int), 1, arquivo);
         size_t nomeLen = 0;
-        arquivo.read(reinterpret_cast<char*>(&nomeLen), sizeof(nomeLen));
+        fread(&nomeLen, sizeof(size_t), 1, arquivo);
         p.nome.resize(nomeLen);
-        arquivo.read(&p.nome[0], nomeLen);
-        arquivo.read(reinterpret_cast<char*>(&p.precoUnitario), sizeof(p.precoUnitario));
-        arquivo.read(reinterpret_cast<char*>(&p.quantEstoque), sizeof(p.quantEstoque));
+        fread(&p.nome[0], sizeof(char), nomeLen, arquivo);
+        fread(&p.precoUnitario, sizeof(double), 1, arquivo);
+        fread(&p.quantEstoque, sizeof(int), 1, arquivo);
         produto.push_back(p);
     }
-    arquivo.close();
+    fclose(arquivo);
 }
 
 // Salva os produtos da loja no arquivo binário
 void SalvarProduto(vector<ProdutoLoja> &produto) {
-    ofstream arquivo("Produtos.dat", ios::binary | ios::trunc);
-    if (!arquivo.is_open()) {
-        cout << "Erro: não foi possível abrir o arquivo 'Produtos.dat' para escrita" << endl;
+    FILE* arquivo = nullptr;
+    if (fopen_s(&arquivo, "Produtos.dat", "wb") != 0 || arquivo == nullptr) {
+        cout << "Não foi possível abrir o arquivo\n\n";
         system("pause");
         return;
     }
+
     size_t tamanho = produto.size();
-    arquivo.write(reinterpret_cast<const char*>(&tamanho), sizeof(tamanho));
+    fwrite(&tamanho, sizeof(size_t), 1, arquivo);
     for (const auto& p : produto) {
-        arquivo.write(reinterpret_cast<const char*>(&p.id), sizeof(p.id));
+        fwrite(&p.id, sizeof(int), 1, arquivo);
         size_t nomeLen = p.nome.size();
-        arquivo.write(reinterpret_cast<const char*>(&nomeLen), sizeof(nomeLen));
-        arquivo.write(p.nome.c_str(), nomeLen);
-        arquivo.write(reinterpret_cast<const char*>(&p.precoUnitario), sizeof(p.precoUnitario));
-        arquivo.write(reinterpret_cast<const char*>(&p.quantEstoque), sizeof(p.quantEstoque));
+        fwrite(&nomeLen, sizeof(size_t), 1, arquivo);
+        fwrite(p.nome.c_str(), sizeof(char), nomeLen, arquivo);
+        fwrite(&p.precoUnitario, sizeof(double), 1, arquivo);
+        fwrite(&p.quantEstoque, sizeof(int), 1, arquivo);
     }
-    arquivo.close();
+    fclose(arquivo);
 }
 
 // Cadastra um novo produto na loja
@@ -732,58 +736,67 @@ void GerenciamentoCliente(vector<Clientes>& cliente) {
 
 // Carregar os Clientes do Arquivo Binário
 void CarregarCliente(vector<Clientes>& cliente) {
-    ifstream arquivo("Cliente.dat", ios::binary);
-    if (!arquivo.is_open()) {
+    FILE* arquivo = nullptr;
+    if (fopen_s(&arquivo, "Clientes.dat", "rb") != 0 || arquivo == nullptr) {
         return;
     }
-    
+
     size_t tamanho = 0;
-    arquivo.read(reinterpret_cast<char*>(&tamanho), sizeof(tamanho));
+    fread(&tamanho, sizeof(size_t), 1, arquivo);
     for (size_t i = 0; i < tamanho; i++) {
         Clientes c;
-        arquivo.read(reinterpret_cast<char*>(&c.id), sizeof(c.id));
-        size_t nomelen;
-        arquivo.read(reinterpret_cast<char*>(&nomelen), sizeof(nomelen));
-        c.nome.resize(nomelen);
-        arquivo.read(&c.nome[0], nomelen);
-        size_t cpflen;
-        arquivo.read(reinterpret_cast<char*>(&cpflen), sizeof(cpflen));
-        c.cpf.resize(cpflen);
-        arquivo.read(&c.cpf[0], cpflen);
-        size_t contatolen;
-        arquivo.read(reinterpret_cast<char*>(&contatolen), sizeof(contatolen));
-        c.contato.resize(contatolen);
-        arquivo.read(&c.contato[0], contatolen);
-        arquivo.read(reinterpret_cast<char*>(&c.saldoDevedor), sizeof(c.saldoDevedor));
+        fread(&c.id, sizeof(int), 1, arquivo);
+
+        size_t nomeLen;
+        fread(&nomeLen, sizeof(size_t), 1, arquivo);
+        c.nome.resize(nomeLen);
+        fread(&c.nome[0], sizeof(char), nomeLen, arquivo);
+
+        size_t cpfLen;
+        fread(&cpfLen, sizeof(size_t), 1, arquivo);
+        c.cpf.resize(cpfLen);
+        fread(&c.cpf[0], sizeof(char), cpfLen, arquivo);
+
+        size_t contatoLen;
+        fread(&contatoLen, sizeof(size_t), 1, arquivo);
+        c.contato.resize(contatoLen);
+        fread(&c.contato[0], sizeof(char), contatoLen, arquivo);
+
+        fread(&c.saldoDevedor, sizeof(double), 1, arquivo);
         cliente.push_back(c);
     }
-    arquivo.close();
+    fclose(arquivo);
 }
 
 // Salvar os Clientes do Arquivo Binário
 void SalvarCliente(vector<Clientes>& cliente) {
-    ofstream arquivo("Cliente.dat", ios::binary | ios::trunc);
-    if (!arquivo.is_open()) {
-        cout << "Erro: não foi possível abrir o arquivo Cliente.dat\n\n";
+    FILE* arquivo = nullptr;
+    if (fopen_s(&arquivo, "Clientes.dat", "wb") != 0 || arquivo == nullptr) {
+        cout << "Não foi possível abrir o arquivo\n\n";
         system("pause");
         return;
     }
+
     size_t tamanho = cliente.size();
-    arquivo.write(reinterpret_cast<const char*>(&tamanho), sizeof(tamanho));
+    fwrite(&tamanho, sizeof(size_t), 1, arquivo);
     for (const auto& c : cliente) {
-        arquivo.write(reinterpret_cast<const char*>(&c.id), sizeof(c.id));
-        size_t nomelen = c.nome.size();
-        arquivo.write(reinterpret_cast<const char*>(&nomelen), sizeof(nomelen));
-        arquivo.write(c.nome.c_str(), nomelen);
-        size_t cpflen = c.cpf.size();
-        arquivo.write(reinterpret_cast<const char*>(&cpflen), sizeof(cpflen));
-        arquivo.write(c.cpf.c_str(), cpflen);
-        size_t contatolen = c.contato.size();
-        arquivo.write(reinterpret_cast<const char*>(&contatolen), sizeof(contatolen));
-        arquivo.write(c.contato.c_str(), contatolen);
-        arquivo.write(reinterpret_cast<const char*>(&c.saldoDevedor), sizeof(c.saldoDevedor));
+        fwrite(&c.id, sizeof(int), 1, arquivo);
+        
+        size_t nomeLen = c.nome.size();
+        fwrite(&nomeLen, sizeof(size_t), 1, arquivo);
+        fwrite(c.nome.c_str(), sizeof(char), nomeLen, arquivo);
+
+        size_t cpfLen = c.cpf.size();
+        fwrite(&cpfLen, sizeof(size_t), 1, arquivo);
+        fwrite(c.cpf.c_str(), sizeof(char), cpfLen, arquivo);
+
+        size_t contatoLen = c.contato.size();
+        fwrite(&contatoLen, sizeof(size_t), 1, arquivo);
+        fwrite(c.contato.c_str(), sizeof(char), contatoLen, arquivo);
+
+        fwrite(&c.saldoDevedor, sizeof(double), 1, arquivo);
     }
-    arquivo.close();
+    fclose(arquivo);
 }
 
 // Cadastrar Cliente
@@ -1013,49 +1026,57 @@ void RelatoriosCaixa(vector<Venda>& vendas, vector<Combustivel> &combustiveis, v
 
 // Carrega as vendas do arquivo binário
 void CarregarVendas(vector<Venda>& vendas) {
-    ifstream arquivo("vendas.dat", ios::binary);
-    if (!arquivo.is_open()) {
+    FILE* arquivo = nullptr;
+    if (fopen_s(&arquivo, "Vendas.dat", "rb") != 0 || arquivo == nullptr) {
         return;
     }
+
     size_t tamanho = 0;
-    arquivo.read(reinterpret_cast<char*>(&tamanho), sizeof(tamanho));
-    for (size_t i = 0; i < tamanho; ++i) {
+    fread(&tamanho, sizeof(size_t), 1, arquivo);
+    for (size_t i = 0; i < tamanho; i++) {
         Venda v;
         int tipoInt;
-        arquivo.read(reinterpret_cast<char*>(&tipoInt), sizeof(tipoInt));
+        fread(&tipoInt, sizeof(int), 1, arquivo);
         v.tipo = (tipoInt == 0) ? Venda::COMBUSTIVEL : Venda::PRODUTO;
+
         size_t nomeLen = 0;
-        arquivo.read(reinterpret_cast<char*>(&nomeLen), sizeof(nomeLen));
+        fread(&nomeLen, sizeof(size_t), 1, arquivo);
         v.nomeItem.resize(nomeLen);
-        arquivo.read(&v.nomeItem[0], nomeLen);
-        arquivo.read(reinterpret_cast<char*>(&v.quantVendido), sizeof(v.quantVendido));
-        arquivo.read(reinterpret_cast<char*>(&v.valorTotal), sizeof(v.valorTotal));
-        arquivo.read(reinterpret_cast<char*>(&v.formaPagamento), sizeof(v.formaPagamento));
+        fread(&v.nomeItem[0], sizeof(char), nomeLen, arquivo);
+
+        fread(&v.quantVendido, sizeof(double), 1, arquivo);
+        fread(&v.valorTotal, sizeof(double), 1, arquivo);
+        fread(&v.formaPagamento, sizeof(int), 1, arquivo);
         vendas.push_back(v);
     }
-    arquivo.close();
+    fclose(arquivo);
 }
 
 // Salva as vendas no arquivo binário
 void SalvarVendas(vector<Venda>& vendas) {
-    ofstream arquivo("vendas.dat", ios::binary | ios::trunc);
-    if (!arquivo.is_open()) {
-        cout << "Erro: não foi possível abrir o arquivo de vendas.\n";
+    FILE* arquivo = nullptr;
+    if (fopen_s(&arquivo, "Vendas.dat", "wb") != 0 || arquivo == nullptr) {
+        cout << "Não foi possível abrir o arquivo\n\n";
+        system("pause");
         return;
     }
+
     size_t tamanho = vendas.size();
-    arquivo.write(reinterpret_cast<const char*>(&tamanho), sizeof(tamanho));
+    fwrite(&tamanho, sizeof(size_t), 1, arquivo);
+
     for (const auto& v : vendas) {
         int tipoInt = (v.tipo == Venda::COMBUSTIVEL ? 0 : 1);
-        arquivo.write(reinterpret_cast<const char*>(&tipoInt), sizeof(tipoInt));
+        fwrite(&tipoInt, sizeof(int), 1, arquivo);
+
         size_t nomeLen = v.nomeItem.size();
-        arquivo.write(reinterpret_cast<const char*>(&nomeLen), sizeof(nomeLen));
-        arquivo.write(v.nomeItem.c_str(), nomeLen);
-        arquivo.write(reinterpret_cast<const char*>(&v.quantVendido), sizeof(v.quantVendido));
-        arquivo.write(reinterpret_cast<const char*>(&v.valorTotal), sizeof(v.valorTotal));
-        arquivo.write(reinterpret_cast<const char*>(&v.formaPagamento), sizeof(v.formaPagamento));
+        fwrite(&nomeLen, sizeof(size_t), 1, arquivo);
+        fwrite(v.nomeItem.c_str(), sizeof(char), nomeLen, arquivo);
+
+        fwrite(&v.quantVendido, sizeof(double), 1, arquivo);
+        fwrite(&v.valorTotal, sizeof(double), 1, arquivo);
+        fwrite(&v.formaPagamento, sizeof(int), 1, arquivo);
     }
-    arquivo.close();
+    fclose(arquivo);
 }
 
 // Registra uma nova venda (combustível ou produto)
@@ -1346,36 +1367,38 @@ void RelatorioClienteDevedores(const vector<Clientes>& cliente) {
 
 // Carregar o Histórico de Fechamento do Arquivo Binário
 void CarregarHistoricoFechamento(vector<fechamentoCaixa>& historico) {
-    ifstream arquivo("historico.dat", ios::binary);
-    if (!arquivo.is_open()) {
+    FILE* arquivo = nullptr;
+    if (fopen_s(&arquivo, "Historico.dat", "rb") != 0 || arquivo == nullptr) {
         return;
     }
 
     size_t tamanho = 0;
-    arquivo.read(reinterpret_cast<char*>(&tamanho), sizeof(tamanho));
+    fread(&tamanho, sizeof(size_t), 1, arquivo);
+
     for (size_t i = 0; i < tamanho; i++) {
         fechamentoCaixa f;
-        arquivo.read(reinterpret_cast<char*>(&f), sizeof(fechamentoCaixa));
+        fread(&f, sizeof(fechamentoCaixa), 1, arquivo);
         historico.push_back(f);
     }
-    arquivo.close();
+    fclose(arquivo);
 }
 
 // Savar Histórico de Fechamentos no Arquivo Binário
 void SalvarHistoricoFechamento(const vector<fechamentoCaixa>& historico) {
-    ofstream arquivo("historico.dat", ios::binary | ios::trunc);
-    if (!arquivo.is_open()) {
-        cout << "Erro: não foi possível abrir o arquivo de histórico\n\n";
+    FILE* arquivo = nullptr;
+    if (fopen_s(&arquivo, "Historico.dat", "wb") != 0 || arquivo == nullptr) {
+        cout << "Não foi possível abrir o arquivo\n\n";
         system("pause");
         return;
     }
 
     size_t tamanho = historico.size();
-    arquivo.write(reinterpret_cast<const char*>(&tamanho), sizeof(tamanho));
-    for (const auto& fechamento : historico) {
-        arquivo.write(reinterpret_cast<const char*>(&fechamento), sizeof(fechamentoCaixa));
+    fwrite(&tamanho, sizeof(size_t), 1, arquivo);
+
+    for (const auto& f : historico) {
+        fwrite(&f, sizeof(fechamentoCaixa), 1, arquivo);
     }
-    arquivo.close();
+    fclose(arquivo);
 }
 
 // Exibir o Histórico de Fechamento de Caixa
