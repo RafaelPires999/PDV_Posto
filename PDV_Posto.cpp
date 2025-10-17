@@ -1008,9 +1008,15 @@ void ExcluirCliente(vector<Clientes>& cliente) {
         cin >> confirmar;
 
         if (toupper(confirmar) == 'S') {
-            cliente.erase(cliente.begin() + indice);
-            SalvarCliente(cliente);
-            cout << "\nCliente Excluido com Sucesso\n\n";
+            if (cliente[indice].saldoDevedor == 0) {
+                cliente.erase(cliente.begin() + indice);
+                SalvarCliente(cliente);
+                cout << "\nCliente Excluido com Sucesso\n\n";
+            }
+            else {
+                cout << "\nCliente Não Pode Ser Excluido\n\n";
+                cout << "Saldo Dívida: R$ " << fixed << setprecision(2) << cliente[indice].saldoDevedor << "\n\n";
+            }
         }
         else {
             cout << "\nExclusão Cancelado\n\n";
