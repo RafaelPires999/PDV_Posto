@@ -77,6 +77,7 @@ void SalvarCombustiveis(const vector<Combustivel>& combustiveis);
 void CadastrarCombustivel(vector<Combustivel>& combustiveis);
 void AtualizarPreco(vector<Combustivel>& combustiveis);
 void AddEstoqueCombustivel(vector<Combustivel> &combustiveis);
+void ExcluirCombustivel(vector<Combustivel>& combustiveis);
 void ListarCombustivel(const vector<Combustivel>& combustiveis);
 int BuscaCombustivel(const vector<Combustivel>& combustiveis, const string& nome);
 void QuantidadeTanque(const vector<Combustivel>& combustiveis);
@@ -90,6 +91,7 @@ void CadastrarProduto(vector<ProdutoLoja>& produto);
 void AtualizarPrecoProduto(vector<ProdutoLoja>& produto);
 void AddEstoqueProduto(vector<ProdutoLoja> &produto);
 void ListarProduto(const vector<ProdutoLoja>& produto);
+void ExcluirProduto(vector<ProdutoLoja>& produto);
 
 // Funções de Clientes
 void GerenciamentoCliente(vector<Clientes>& cliente);
@@ -100,6 +102,7 @@ void ListarCliente(const vector<Clientes>& cliente);
 int BuscaClienteNome(const vector<Clientes>& cliente, string nomeCliente);
 void consultarSaldo(vector<Clientes>& cliente);
 void RegistrarPagamentoCliente(vector<Clientes>& cliente);
+void ExcluirCliente(vector<Clientes>& cliente);
 
 // Funções de Venda e Relatórios e Caixa 
 void RelatoriosCaixa(vector<Venda>& vendas, vector<Combustivel>& combustiveis, vector<Clientes>& cliente, vector<fechamentoCaixa>& historico);
@@ -283,7 +286,8 @@ void GerenciarCombustivel(vector<Combustivel>& combustiveis) {
         cout << "1 - Cadastrar Novo Combustível\n";
         cout << "2 - Atualizar Preço por Litro\n";
         cout << "3 - Registrar Entrada de Estoque\n";
-        cout << "4 - Listar Combustíveis\n\n";
+        cout << "4 - Excluir Combustível\n";
+        cout << "5 - Listar Combustíveis\n\n";
         cout << "0 - Voltar ao Menu Principal\n\n";
         cout << "Digite sua Opção: ";
         cin >> escolha;
@@ -306,6 +310,9 @@ void GerenciarCombustivel(vector<Combustivel>& combustiveis) {
             AddEstoqueCombustivel(combustiveis);
             break;
         case 4:
+            ExcluirCombustivel(combustiveis);
+            break;
+        case 5:
             ListarCombustivel(combustiveis);
             system("pause");
             break;
@@ -432,6 +439,44 @@ void AddEstoqueCombustivel(vector<Combustivel> &combustiveis) {
     system("pause");
 }
 
+// Excluir Combustível
+void ExcluirCombustivel(vector<Combustivel>& combustiveis) {
+    string nome;
+    char confirmar;
+    system("cls");
+    cout << "==================== EXCLUIR COMBUSTÍVEL =======================\n\n";
+    cout << "Qual combustpivel Deseja Excluir ? (Ex. Etanol): ";
+    cin.ignore();
+    getline(cin, nome);
+    transform(nome.begin(), nome.end(), nome.begin(), ::toupper);
+
+    int indice = BuscaCombustivel(combustiveis, nome);
+    cout << endl;
+
+    if (indice != -1) {
+        cout << "Combustível: " << setw(15) << combustiveis[indice].nome << "\n";
+        cout << "Preço:" << setw(18) << "R$ " << fixed << setprecision(2) << combustiveis[indice].precoPorLitro << "\n";
+        cout << "Estoque:" << setw(20) << fixed << setprecision(2) << combustiveis[indice].estoqueLitros << " Litros\n";
+        cout << "--------------------------------------------------------------\n\n";
+
+        cout << "Deseja Excluir ? (S/N): ";
+        cin >> confirmar;
+        
+        if (toupper(confirmar) == 'S') {
+            combustiveis.erase(combustiveis.begin() + indice);
+            SalvarCombustiveis(combustiveis);
+            cout << "\nCombustível Excluido com Sucesso\n\n";
+        }
+        else {
+            cout << "\nExclusão Cancelado\n\n";
+        }
+    }
+    else {
+        cout << "\nCombustível Não Encontrado\n\n";
+    }
+    system("pause");
+}
+
 // Lista todos os combustíveis cadastrados
 void ListarCombustivel(const vector<Combustivel>& combustiveis) {
     system("cls");
@@ -481,7 +526,8 @@ void GerenciamentoConveniencia(vector<ProdutoLoja> &produto) {
         cout << "1 - Cadastrar Novo Produto";
         cout << "\n2 - Atualizar Preço do Produto";
         cout << "\n3 - Adicionar Estoque";
-        cout << "\n4 - Listar Produto\n\n";
+        cout << "\n4 - Excluir Produto";
+        cout << "\n5 - Listar Produto\n\n";
         cout << "0 - Voltar ao Menu Principal\n\n";
         cout << "Digite Opção: ";
         cin >> escolha;
@@ -504,6 +550,9 @@ void GerenciamentoConveniencia(vector<ProdutoLoja> &produto) {
             AddEstoqueProduto(produto);
             break;
         case 4:
+            ExcluirProduto(produto);
+            break;
+        case 5:
             ListarProduto(produto);
             system("pause");
             break;
@@ -661,6 +710,44 @@ void AtualizarPrecoProduto(vector<ProdutoLoja>& produto) {
     system("pause");
 }
 
+// Exluir Produto
+void ExcluirProduto(vector<ProdutoLoja>& produto) {
+    int cod;
+    char confirmar;
+    system("cls");
+    cout << "====================== EXCLUIR PRODUTO ======================\n\n";
+    cout << "Digite o Código do Produto Que Deseja Excluir: ";
+    cin >> cod;
+
+    int indice = BuscaProduto(produto, cod);
+    cout << endl;
+
+    if (indice != -1) {
+        cout << right;
+        cout << setw(7) << produto[indice].id
+            << setw(20) << produto[indice].nome
+            << setw(15) << "R$ " << fixed << setprecision(2) << produto[indice].precoUnitario
+            << setw(11) << produto[indice].quantEstoque;
+        cout << "\n-------------------------------------------------------------\n";
+
+        cout << "\nDeseja Excluir ? (S/N): ";
+        cin >> confirmar;
+
+        if (toupper(confirmar) == 'S') {
+            produto.erase(produto.begin() + indice);
+            SalvarProduto(produto);
+            cout << "\nProduto Excluido com Sucesso\n\n";
+        }
+        else {
+            cout << "\nExclusão Cancelado\n\n";
+        }
+    }
+    else {
+        cout << "\Produto Não Encontrado\n\n";
+    }
+    system("pause");
+}
+
 // Adiciona estoque a um produto
 void AddEstoqueProduto(vector<ProdutoLoja> &produto) {
     int id;
@@ -699,7 +786,8 @@ void GerenciamentoCliente(vector<Clientes>& cliente) {
         cout << "1 - Cadastrar Novo Cliente\n";
         cout << "2 - Listar Todos os Clientes\n";
         cout << "3 - Consultar Saldo de Cliente\n";
-        cout << "4 - Registrar Pagamento de Dívida\n\n";
+        cout << "4 - Registrar Pagamento de Dívida\n";
+        cout << "5 - Exluir Cliente\n\n";
         cout << "0 - Voltar ao Menu Principal\n\n";
         cout << "Digite sua Opção: ";
         cin >> escolha;
@@ -724,6 +812,8 @@ void GerenciamentoCliente(vector<Clientes>& cliente) {
         case 4:
             RegistrarPagamentoCliente(cliente);
             break;
+        case 5:
+            ExcluirCliente(cliente);
         case 0:
             break;
         default:
@@ -882,6 +972,54 @@ int BuscaClienteNome(const vector<Clientes>& cliente, string nomeCliente) {
         }
     }
     return -1;
+}
+
+// Excluir Cliente
+void ExcluirCliente(vector<Clientes>& cliente) {
+    string nome;
+    char confirmar;
+    system("cls");
+    cout << "===================================== EXCLUIR CLIENTES ======================================\n\n";
+    cout << "Qual Cliente Deseja Excluir ?: ";
+    cin.ignore();
+    getline(cin, nome);
+    transform(nome.begin(), nome.end(), nome.begin(), ::toupper);
+
+    int indice = BuscaClienteNome(cliente, nome);
+    cout << endl;
+
+    if (indice != -1) {
+        cout << left;
+        cout << setw(5) << "ID"
+            << setw(30) << "NOME"
+            << setw(18) << "CPF"
+            << setw(20) << "CONTATO"
+            << "SALDO DEVEDOR" << endl;
+        cout << "---------------------------------------------------------------------------------------------\n\n";
+        cout << setw(5) << cliente[indice].id
+            << setw(30) << cliente[indice].nome
+            << setw(18) << cliente[indice].cpf
+            << setw(20) << cliente[indice].contato
+            << "R$ "
+            << fixed << setprecision(2) << cliente[indice].saldoDevedor << endl;
+        cout << "---------------------------------------------------------------------------------------------\n";
+
+        cout << "\nDeseja Excluir ?(S/N): ";
+        cin >> confirmar;
+
+        if (toupper(confirmar) == 'S') {
+            cliente.erase(cliente.begin() + indice);
+            SalvarCliente(cliente);
+            cout << "\nCliente Excluido com Sucesso\n\n";
+        }
+        else {
+            cout << "\nExclusão Cancelado\n\n";
+        }
+    }
+    else {
+        cout << "\Cliente Não Encontrado\n\n";
+    }
+    system("pause");
 }
 
 // Consultar Saldo do Cliente
