@@ -70,6 +70,8 @@ void OpcaoMenu(int op_menu, vector<Combustivel>& combustiveis, vector<ProdutoLoj
 DataHora obterDataHoraAtual();
 void ImprimirDataHoraAtual();
 
+void VerificarSim_Nao(char& confirmar);
+
 // Funções de Combustível
 void GerenciarCombustivel(vector<Combustivel>& combustiveis);
 void CarregarCombustiveis(vector<Combustivel>& combustiveis);
@@ -229,6 +231,20 @@ void ImprimirDataHoraAtual() {
 }
 
 
+// ===================== TRATAMENTO DE DADOS ======================
+
+// Verificação de sim ou não
+void VerificarSim_Nao(char &confirmar) {
+    while (toupper(confirmar) != 'S' && toupper(confirmar) != 'N') {
+        system("cls");
+        cout << "Dígito Inválido\n\n";
+        cout << "Dígite (S/N): ";
+        cin >> confirmar;
+        system("cls");
+    }
+}
+
+
 // ==================== Funções de Combustível ====================
 
 // Salva os dados dos combustíveis no arquivo binário
@@ -368,6 +384,8 @@ void CadastrarCombustivel(vector<Combustivel>& combustiveis) {
         cout << "\n\nDeseja confirmar o cadastro? (S/N): ";
         cin >> confirma;
 
+        VerificarSim_Nao(confirma);
+
         if (toupper(confirma) == 'S') {
             combustiveis.push_back(cadastro);
             SalvarCombustiveis(combustiveis);
@@ -378,103 +396,140 @@ void CadastrarCombustivel(vector<Combustivel>& combustiveis) {
         }
         cout << "Deseja Cadastrar Outro Combustível ? (S/N): ";
         cin >> op;
+
+        VerificarSim_Nao(op);
+
     } while (toupper(op) == 'S');
 }
 
 // Atualiza o preço de um combustível
 void AtualizarPreco(vector<Combustivel>& combustiveis) {
     string nome;
-    system("cls");
-    cout << "===================== ATUALIZAR PREÇO =====================\n\n";
-    cout << "Qual combustível deseja atualizar? (Ex. Etanol): ";
-    cin.ignore();
-    getline(cin, nome);
+    char confirmar;
+    do {
+        system("cls");
+        cout << "===================== ATUALIZAR PREÇO =====================\n\n";
+        cout << "Qual combustível deseja atualizar? (Ex. Etanol): ";
+        cin.ignore();
+        getline(cin, nome);
 
-    int indice = BuscaCombustivel(combustiveis, nome);
+        int indice = BuscaCombustivel(combustiveis, nome);
 
-    if (indice != -1) {
-        cout << "\nPreço atual do " << combustiveis[indice].nome
-            << ": R$ " << fixed << setprecision(2) << combustiveis[indice].precoPorLitro << "\n";
+        if (indice != -1) {
+            cout << "\nPreço atual do " << combustiveis[indice].nome
+                << ": R$ " << fixed << setprecision(2) << combustiveis[indice].precoPorLitro << "\n";
 
-        double novoPreco;
-        cout << "Digite o novo preço por litro: R$ ";
-        cin >> novoPreco;
+            double novoPreco;
+            cout << "Digite o novo preço por litro: R$ ";
+            cin >> novoPreco;
 
-        combustiveis[indice].precoPorLitro = novoPreco; 
-        SalvarCombustiveis(combustiveis);              
+            combustiveis[indice].precoPorLitro = novoPreco;
+            SalvarCombustiveis(combustiveis);
 
-        cout << "\nPreço atualizado com sucesso!\n\n";
-    }
-    else {
-        cout << "\nCombustível não encontrado!\n\n";
-    }
-    system("pause");
+            cout << "\nPreço atualizado com sucesso!\n\n";
+        }
+        else {
+            cout << "\nCombustível não encontrado!\n\n";
+        }
+
+        cout << "Deseja Atualizar Outro Preço ? (S/N): ";
+        cin >> confirmar;
+
+        VerificarSim_Nao(confirmar);
+    } while (toupper(confirmar) == 'S');
 }
 
 // Adiciona estoque a um combustível
 void AddEstoqueCombustivel(vector<Combustivel> &combustiveis) {
     string nome;
-    system("cls");
-    cout << "================== ENTRADA DE ESTOQUE ===================\n\n";
-    cout << "Qual Combustível Deseja Inserir Estoque ? (Ex. Etanol): ";
-    cin.ignore();
-    getline(cin, nome);
+    char confirmar;
+    do {
+        system("cls");
+        cout << "================== ENTRADA DE ESTOQUE ===================\n\n";
+        cout << "Qual Combustível Deseja Inserir Estoque ? (Ex. Etanol): ";
+        cin.ignore();
+        getline(cin, nome);
 
-    int indice = BuscaCombustivel(combustiveis, nome);
-    if (indice != -1) {
-        cout << "\nEstoque Atual do " << combustiveis[indice].nome
-            << ": " << fixed << setprecision(2) << combustiveis[indice].estoqueLitros;
+        int indice = BuscaCombustivel(combustiveis, nome);
+        if (indice != -1) {
+            cout << "\nEstoque Atual do " << combustiveis[indice].nome
+                << ": " << fixed << setprecision(2) << combustiveis[indice].estoqueLitros;
 
-        double addEstoque;
-        cout << "\nDigite Quantidade Para Estoque: ";
-        cin >> addEstoque;
+            double addEstoque;
+            cout << "\nDigite Quantidade Para Estoque: ";
+            cin >> addEstoque;
 
-        combustiveis[indice].estoqueLitros += addEstoque;
-        SalvarCombustiveis(combustiveis);
-        cout << "\nEstoque Atualizado com Sucesso\n\n";
-    }
-    else {
-        cout << "\nCombustível não Encontrado\n\n";
-    }
-    system("pause");
+            combustiveis[indice].estoqueLitros += addEstoque;
+            SalvarCombustiveis(combustiveis);
+            cout << "\nEstoque Atualizado com Sucesso\n\n";
+        }
+        else {
+            cout << "\nCombustível não Encontrado\n\n";
+        }
+
+        cout << "Deseja Inserir Outro Estoque ? (S/N): ";
+        cin >> confirmar;
+
+        VerificarSim_Nao(confirmar);
+    } while (toupper(confirmar) == 'S');
 }
 
 // Excluir Combustível
 void ExcluirCombustivel(vector<Combustivel>& combustiveis) {
     string nome;
-    char confirmar;
-    system("cls");
-    cout << "==================== EXCLUIR COMBUSTÍVEL =======================\n\n";
-    cout << "Qual combustpivel Deseja Excluir ? (Ex. Etanol): ";
-    cin.ignore();
-    getline(cin, nome);
-    transform(nome.begin(), nome.end(), nome.begin(), ::toupper);
+    char confirmar, op;
+    do {
+        system("cls");
+        cout << "==================== EXCLUIR COMBUSTÍVEL =======================\n\n";
+        cout << "Qual combustível Deseja Excluir ? (Ex. Etanol): ";
+        cin.ignore();
+        getline(cin, nome);
+        transform(nome.begin(), nome.end(), nome.begin(), ::toupper);
 
-    int indice = BuscaCombustivel(combustiveis, nome);
-    cout << endl;
+        int indice = BuscaCombustivel(combustiveis, nome);
+        cout << endl;
 
-    if (indice != -1) {
-        cout << "Combustível: " << setw(15) << combustiveis[indice].nome << "\n";
-        cout << "Preço:" << setw(18) << "R$ " << fixed << setprecision(2) << combustiveis[indice].precoPorLitro << "\n";
-        cout << "Estoque:" << setw(20) << fixed << setprecision(2) << combustiveis[indice].estoqueLitros << " Litros\n";
-        cout << "--------------------------------------------------------------\n\n";
+        if (indice != -1) {
+            cout << "Combustível: " << setw(15) << combustiveis[indice].nome << "\n";
+            cout << "Preço:" << setw(18) << "R$ " << fixed << setprecision(2) << combustiveis[indice].precoPorLitro << "\n";
+            cout << "Estoque:" << setw(20) << fixed << setprecision(2) << combustiveis[indice].estoqueLitros << " Litros\n";
+            cout << "--------------------------------------------------------------\n\n";
 
-        cout << "Deseja Excluir ? (S/N): ";
-        cin >> confirmar;
-        
-        if (toupper(confirmar) == 'S') {
-            combustiveis.erase(combustiveis.begin() + indice);
-            SalvarCombustiveis(combustiveis);
-            cout << "\nCombustível Excluido com Sucesso\n\n";
+            cout << "Deseja Excluir ? (S/N): ";
+            cin >> confirmar;
+
+            VerificarSim_Nao(confirmar);
+
+            if (toupper(confirmar) == 'S') {
+                if (combustiveis[indice].estoqueLitros == 0) {
+                    combustiveis.erase(combustiveis.begin() + indice);
+                    SalvarCombustiveis(combustiveis);
+                    cout << "\nCombustível Excluido com Sucesso\n\n";
+                }
+                else {
+                    system("cls");
+                    cout << "Combustível com Estoque\n\n";
+                    cout << "Combustivel: " << combustiveis[indice].nome;
+                    cout << "\nEstoque:     " << fixed << setprecision(2) << combustiveis[indice].estoqueLitros << " Litros";
+                    cout << "\n\nExclusão Cancelado\n\n";
+                }
+            }
+            else {
+                cout << "\nExclusão Cancelado\n\n";
+            }
         }
         else {
-            cout << "\nExclusão Cancelado\n\n";
+            cout << "\nCombustível Não Encontrado\n\n";
         }
-    }
-    else {
-        cout << "\nCombustível Não Encontrado\n\n";
-    }
-    system("pause");
+
+        cout << "Deseja Excluir Outro Combustível ? (S/N): ";
+        cin >> op;
+        
+        VerificarSim_Nao(op);
+
+        cout << "\n\n";
+
+    } while (toupper(op) == 'S');
 }
 
 // Lista todos os combustíveis cadastrados
@@ -685,29 +740,36 @@ void ListarProduto(const vector<ProdutoLoja>& produto) {
 // Atualiza o preço de um produto
 void AtualizarPrecoProduto(vector<ProdutoLoja>& produto) {
     int id;
-    system("cls");
-    cout << "================ ATUALIZAR PREÇO DO PRODUTO ================\n\n";
-    cout << "Qual Produto Deseja Aualizar o Preço: ";
-    cin >> id;
+    char confirmar;
+    do {
+        system("cls");
+        cout << "================ ATUALIZAR PREÇO DO PRODUTO ================\n\n";
+        cout << "Qual Produto Deseja Aualizar o Preço: ";
+        cin >> id;
 
-    int indice = BuscaProduto(produto, id);
-    if (indice != -1) {
-        cout << "\nProduto: " << produto[indice].nome;
-        cout << "\nPreço Atual: R$ " << fixed << setprecision(2) << produto[indice].precoUnitario;
+        int indice = BuscaProduto(produto, id);
+        if (indice != -1) {
+            cout << "\nProduto: " << produto[indice].nome;
+            cout << "\nPreço Atual: R$ " << fixed << setprecision(2) << produto[indice].precoUnitario;
 
-        double novopreco;
-        cout << "\n\nDigite o Preço Atual: ";
-        cin >> novopreco;
+            double novopreco;
+            cout << "\n\nDigite o Preço Atual: ";
+            cin >> novopreco;
 
-        produto[indice].precoUnitario = novopreco;
-        SalvarProduto(produto);
+            produto[indice].precoUnitario = novopreco;
+            SalvarProduto(produto);
 
-        cout << "\nPreço Atualizado com Sucesso\n\n";
-    }
-    else {
-        cout << "\nCódigo Não Encontrado\n\n";
-    }
-    system("pause");
+            cout << "\nPreço Atualizado com Sucesso\n\n";
+        }
+        else {
+            cout << "\nCódigo Não Encontrado\n\n";
+        }
+
+        cout << "Deseja Alterar Outro Preço ? (S/N): ";
+        cin >> confirmar;
+
+        VerificarSim_Nao(confirmar);
+    } while (toupper(confirmar) == 'S');
 }
 
 // Exluir Produto
