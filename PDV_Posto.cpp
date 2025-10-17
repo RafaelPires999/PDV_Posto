@@ -70,6 +70,7 @@ void OpcaoMenu(int op_menu, vector<Combustivel>& combustiveis, vector<ProdutoLoj
 DataHora obterDataHoraAtual();
 void ImprimirDataHoraAtual();
 
+// Tratamento de Dados
 void VerificarSim_Nao(char& confirmar);
 
 // Funções de Combustível
@@ -526,9 +527,6 @@ void ExcluirCombustivel(vector<Combustivel>& combustiveis) {
         cin >> op;
         
         VerificarSim_Nao(op);
-
-        cout << "\n\n";
-
     } while (toupper(op) == 'S');
 }
 
@@ -694,6 +692,8 @@ void CadastrarProduto(vector<ProdutoLoja>& produto) {
         cout << "\n\nDeseja Confirmar Cadastro ? (S/N): ";
         cin >> confirmar;
 
+        VerificarSim_Nao(confirmar);
+
         if (toupper(confirmar) == 'S') {
             produto.push_back(cadastro);
             SalvarProduto(produto);
@@ -702,6 +702,8 @@ void CadastrarProduto(vector<ProdutoLoja>& produto) {
 
         cout << "Deseja Cadastrar Outro Produto ? (S/N): ";
         cin >> op;
+
+        VerificarSim_Nao(op);
     } while (toupper(op) == 'S');
 }
 
@@ -775,64 +777,79 @@ void AtualizarPrecoProduto(vector<ProdutoLoja>& produto) {
 // Exluir Produto
 void ExcluirProduto(vector<ProdutoLoja>& produto) {
     int cod;
-    char confirmar;
-    system("cls");
-    cout << "====================== EXCLUIR PRODUTO ======================\n\n";
-    cout << "Digite o Código do Produto Que Deseja Excluir: ";
-    cin >> cod;
+    char confirmar, op;
+    do {
+        system("cls");
+        cout << "====================== EXCLUIR PRODUTO ======================\n\n";
+        cout << "Digite o Código do Produto Que Deseja Excluir: ";
+        cin >> cod;
 
-    int indice = BuscaProduto(produto, cod);
-    cout << endl;
+        int indice = BuscaProduto(produto, cod);
+        cout << endl;
 
-    if (indice != -1) {
-        cout << right;
-        cout << setw(7) << produto[indice].id
-            << setw(20) << produto[indice].nome
-            << setw(15) << "R$ " << fixed << setprecision(2) << produto[indice].precoUnitario
-            << setw(11) << produto[indice].quantEstoque;
-        cout << "\n-------------------------------------------------------------\n";
+        if (indice != -1) {
+            cout << right;
+            cout << setw(7) << produto[indice].id
+                << setw(20) << produto[indice].nome
+                << setw(15) << "R$ " << fixed << setprecision(2) << produto[indice].precoUnitario
+                << setw(11) << produto[indice].quantEstoque;
+            cout << "\n-------------------------------------------------------------\n";
 
-        cout << "\nDeseja Excluir ? (S/N): ";
-        cin >> confirmar;
+            cout << "\nDeseja Excluir ? (S/N): ";
+            cin >> confirmar;
 
-        if (toupper(confirmar) == 'S') {
-            produto.erase(produto.begin() + indice);
-            SalvarProduto(produto);
-            cout << "\nProduto Excluido com Sucesso\n\n";
+            VerificarSim_Nao(confirmar);
+
+            if (toupper(confirmar) == 'S') {
+                produto.erase(produto.begin() + indice);
+                SalvarProduto(produto);
+                cout << "\nProduto Excluido com Sucesso\n\n";
+            }
+            else {
+                cout << "\nExclusão Cancelado\n\n";
+            }
         }
         else {
-            cout << "\nExclusão Cancelado\n\n";
+            cout << "\Produto Não Encontrado\n\n";
         }
-    }
-    else {
-        cout << "\Produto Não Encontrado\n\n";
-    }
-    system("pause");
+
+        cout << "Deseja Excluir Outro Produto ? (S/N): ";
+        cin >> op;
+
+        VerificarSim_Nao(op);
+    } while (toupper(op) == 'S');
 }
 
 // Adiciona estoque a um produto
 void AddEstoqueProduto(vector<ProdutoLoja> &produto) {
     int id;
-    system("cls");
-    cout << "============== ADICIONAR ESTOQUE PRODUTO ===============\n\n";
-    cout << "Digite o Código do Produto: ";
-    cin >> id;
+    char confirmar;
+    do {
+        system("cls");
+        cout << "============== ADICIONAR ESTOQUE PRODUTO ===============\n\n";
+        cout << "Digite o Código do Produto: ";
+        cin >> id;
 
-    int indice = BuscaProduto(produto, id);
-    if (indice != -1) {
-        cout << "\nProduto: " << produto[indice].nome;
-        cout << "\nEstoque Atual: " << produto[indice].quantEstoque;
+        int indice = BuscaProduto(produto, id);
+        if (indice != -1) {
+            cout << "\nProduto: " << produto[indice].nome;
+            cout << "\nEstoque Atual: " << produto[indice].quantEstoque;
 
-        int estoqueNovo;
-        cout << "\n\nInsira Quantidade: ";
-        cin >> estoqueNovo;
+            int estoqueNovo;
+            cout << "\n\nInsira Quantidade: ";
+            cin >> estoqueNovo;
 
-        produto[indice].quantEstoque += estoqueNovo;
-        SalvarProduto(produto);
+            produto[indice].quantEstoque += estoqueNovo;
+            SalvarProduto(produto);
 
-        cout << "\nEstoque Atualizado com Sucesso\n\n";
-    }
-    system("pause");
+            cout << "\nEstoque Atualizado com Sucesso\n\n";
+        }
+
+        cout << "Deseja Adicionar Outro Estoque ? (S/N): ";
+        cin >> confirmar;
+
+        VerificarSim_Nao(confirmar);
+    } while (toupper(confirmar) == 'S');
 }
 
 
