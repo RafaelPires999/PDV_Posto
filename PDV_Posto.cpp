@@ -1646,11 +1646,21 @@ void CarregarHistoricoFechamento(vector<fechamentoCaixa>& historico) {
     }
 
     size_t tamanho = 0;
-    fread(&tamanho, sizeof(size_t), 1, arquivo);
+    if (fread(&tamanho, sizeof(size_t), 1, arquivo) != 1) {
+        fclose(arquivo);
+        return;
+    }
 
     for (size_t i = 0; i < tamanho; i++) {
         fechamentoCaixa f;
-        fread(&f, sizeof(fechamentoCaixa), 1, arquivo);
+        fread(&f.dataHoraFechamento.dia, sizeof(int), 1, arquivo);
+        fread(&f.dataHoraFechamento.mes, sizeof(int), 1, arquivo);
+        fread(&f.dataHoraFechamento.ano, sizeof(int), 1, arquivo);
+        fread(&f.dataHoraFechamento.hora, sizeof(int), 1, arquivo);
+        fread(&f.dataHoraFechamento.minuto, sizeof(int), 1, arquivo);
+        fread(&f.dataHoraFechamento.segundo, sizeof(int), 1, arquivo);
+        fread(&f.valorTotalVendido, sizeof(double), 1, arquivo);
+
         historico.push_back(f);
     }
     fclose(arquivo);
@@ -1669,7 +1679,13 @@ void SalvarHistoricoFechamento(const vector<fechamentoCaixa>& historico) {
     fwrite(&tamanho, sizeof(size_t), 1, arquivo);
 
     for (const auto& f : historico) {
-        fwrite(&f, sizeof(fechamentoCaixa), 1, arquivo);
+        fwrite(&f.dataHoraFechamento.dia, sizeof(int), 1, arquivo);
+        fwrite(&f.dataHoraFechamento.mes, sizeof(int), 1, arquivo);
+        fwrite(&f.dataHoraFechamento.ano, sizeof(int), 1, arquivo);
+        fwrite(&f.dataHoraFechamento.hora, sizeof(int), 1, arquivo);
+        fwrite(&f.dataHoraFechamento.minuto, sizeof(int), 1, arquivo);
+        fwrite(&f.dataHoraFechamento.segundo, sizeof(int), 1, arquivo);
+        fwrite(&f.valorTotalVendido, sizeof(double), 1, arquivo);
     }
     fclose(arquivo);
 }
@@ -1692,17 +1708,25 @@ void ExibirHistoricoFechamento(const vector<fechamentoCaixa>& historico) {
     cout << "---------------------------------------------------------------------\n\n";
 
     for (const auto& f : historico) {
-        cout << setw(2) << setfill('0') << f.dataHoraFechamento.dia << "/"
-            << setw(2) << setfill('0') << f.dataHoraFechamento.mes << "/"
-            << setw(6) << setfill(' ') << f.dataHoraFechamento.ano;
+        ostringstream ssData;
+        ostringstream ssHora;
 
-        cout << setw(3) << setfill(' ') << " "
-            << setw(2) << setfill('0') << f.dataHoraFechamento.hora << ":"
-            << setw(2) << setfill('0') << f.dataHoraFechamento.minuto << ":"
-            << setw(10) << setfill(' ') << f.dataHoraFechamento.segundo;
+        ssData.imbue(locale::classic());
+        ssHora.imbue(locale::classic());
 
-        cout << setfill(' ') << setw(2) << "R$ "
-            << fixed << setprecision(2) << f.valorTotalVendido << endl;
+        ssData << setfill('0') << setw(2) << f.dataHoraFechamento.dia << "/"
+            << setw(2) << f.dataHoraFechamento.mes << "/"
+            << setw(4) << f.dataHoraFechamento.ano;
+
+        ssHora << setfill('0') << setw(2) << f.dataHoraFechamento.hora << ":"
+            << setw(2) << f.dataHoraFechamento.minuto << ":"
+            << setw(2) << f.dataHoraFechamento.segundo;
+
+        cout << left
+            << setw(15) << ssData.str()
+            << setw(15) << ssHora.str()
+            << "R$ " << fixed << setprecision(2) << f.valorTotalVendido
+            << endl;
     }
     cout << "---------------------------------------------------------------------\n\n";
     system("pause");
