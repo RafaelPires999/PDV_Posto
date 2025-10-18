@@ -72,6 +72,7 @@ void ImprimirDataHoraAtual();
 
 // Tratamento de Dados
 void VerificarSim_Nao(char& confirmar);
+int lerInteiroValido(const string& mensagem);
 
 // Funções de Combustível
 void GerenciarCombustivel(vector<Combustivel>& combustiveis);
@@ -242,6 +243,27 @@ void VerificarSim_Nao(char &confirmar) {
         cout << "Dígite Novamente (S/N): ";
         cin >> confirmar;
         system("cls");
+    }
+}
+
+// Verificação Somente números inteiros
+int lerInteiroValido(const string& mensagem) {
+    int numero;
+    while (true) {
+        cout << mensagem;
+        cin >> numero;
+
+        if (cin.good()) {
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            return numero;
+        }
+        else {
+            system("cls");
+            cout << "Entrada inválida. Por favor, digite apenas um número inteiro.\n\n";
+            cin.clear();
+
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        }
     }
 }
 
@@ -679,22 +701,24 @@ void CadastrarProduto(vector<ProdutoLoja>& produto) {
     do {
         system("cls");
         cout << "=========== CADASTRAR NOVO PRODUTO ===========\n\n";
-        cout << "Código do Produto: ";
-        cin >> cadastro.id;
-        if (BuscaProduto(produto, cadastro.id) != -1) {
-            cout << "\nCódigo Já Cadastrado\n\n";
-            system("pause");
-            return;
+        cadastro.id = lerInteiroValido("Código do Produto: ");
+
+        int indice = BuscaProduto(produto, cadastro.id);
+        if (indice != -1) {
+            system("cls");
+            cout << "Código Já Cadastrado. Deseja tentar outro código? (S/N): ";
+            cin >> op;
+            VerificarSim_Nao(op);
+            if (toupper(op) == 'S') continue;
+            else return;
         }
+
         cout << "Nome do Produto (Ex. Água): ";
-        cin.clear();
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
         getline(cin, cadastro.nome);
         transform(cadastro.nome.begin(), cadastro.nome.end(), cadastro.nome.begin(), ::toupper);
         cout << "Preço Unitário: ";
         cin >> cadastro.precoUnitario;
-        cout << "Estoque Inicial: ";
-        cin >> cadastro.quantEstoque;
+        cadastro.quantEstoque = lerInteiroValido("Estoque Inicial: ");
 
         cout << "\n\nDeseja Confirmar Cadastro ? (S/N): ";
         cin >> confirmar;
@@ -753,8 +777,7 @@ void AtualizarPrecoProduto(vector<ProdutoLoja>& produto) {
     do {
         system("cls");
         cout << "================ ATUALIZAR PREÇO DO PRODUTO ================\n\n";
-        cout << "Qual Produto Deseja Aualizar o Preço: ";
-        cin >> id;
+        id = lerInteiroValido("Qual Produto Deseja Aualizar o Preço: ");
 
         int indice = BuscaProduto(produto, id);
         if (indice != -1) {
@@ -788,8 +811,7 @@ void ExcluirProduto(vector<ProdutoLoja>& produto) {
     do {
         system("cls");
         cout << "====================== EXCLUIR PRODUTO ======================\n\n";
-        cout << "Digite o Código do Produto Que Deseja Excluir: ";
-        cin >> cod;
+        cod = lerInteiroValido("Digite o Código do Produto Que Deseja Excluir: ");
 
         int indice = BuscaProduto(produto, cod);
         cout << endl;
@@ -834,8 +856,7 @@ void AddEstoqueProduto(vector<ProdutoLoja> &produto) {
     do {
         system("cls");
         cout << "============== ADICIONAR ESTOQUE PRODUTO ===============\n\n";
-        cout << "Digite o Código do Produto: ";
-        cin >> id;
+        id = lerInteiroValido("Digite o Código do Produto: ");
 
         int indice = BuscaProduto(produto, id);
         if (indice != -1) {
@@ -843,8 +864,7 @@ void AddEstoqueProduto(vector<ProdutoLoja> &produto) {
             cout << "\nEstoque Atual: " << produto[indice].quantEstoque;
 
             int estoqueNovo;
-            cout << "\n\nInsira Quantidade: ";
-            cin >> estoqueNovo;
+            estoqueNovo = lerInteiroValido("\n\nInsira Quantidade: ");
 
             produto[indice].quantEstoque += estoqueNovo;
             SalvarProduto(produto);
@@ -1398,15 +1418,13 @@ void NovaVenda(vector<Combustivel>& combustivel, vector<ProdutoLoja>& produto, v
             do {
                 system("cls");
                 cout << "=============== PRODUTOS DA LOJA =================\n\n";
-                cout << "Digite o código do Produto: ";
-                cin >> idProduto;
+                idProduto = lerInteiroValido("Digite o código do Produto: ");
 
                 int indice = BuscaProduto(produto, idProduto);
                 if (indice != -1) {
                     cout << "\nProduto: " << produto[indice].nome;
                     int quantidade;
-                    cout << "\nDigite Quantidade: ";
-                    cin >> quantidade;
+                    quantidade = lerInteiroValido("\nDigite Quantidade: ");
 
                     if (quantidade > 0 && produto[indice].quantEstoque >= quantidade) {
                         Venda novaVenda;
