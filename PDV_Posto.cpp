@@ -73,6 +73,7 @@ void ImprimirDataHoraAtual();
 // Tratamento de Dados
 void VerificarSim_Nao(char& confirmar);
 int lerInteiroValido(const string& mensagem);
+double lerFlutuanteValido(const string& mensagem);
 
 // Funções de Combustível
 void GerenciarCombustivel(vector<Combustivel>& combustiveis);
@@ -267,6 +268,26 @@ int lerInteiroValido(const string& mensagem) {
     }
 }
 
+// Verificação de Números Flutuante
+double lerFlutuanteValido(const string& mensagem) {
+    double numero;
+    while (true) {
+        cout << mensagem;
+        cin >> numero;
+
+        if (cin.good()) {
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            return numero;
+        }
+        else {
+            system("cls");
+            cout << "Endrada Inválida. Digite Somente Números.\n\n";
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        }
+    }
+}
+
 
 // ==================== Funções de Combustível ====================
 
@@ -391,24 +412,24 @@ void CadastrarCombustivel(vector<Combustivel>& combustiveis) {
         getline(cin, cadastro.nome);
         transform(cadastro.nome.begin(), cadastro.nome.end(), cadastro.nome.begin(), ::toupper);
 
-        if (BuscaCombustivel(combustiveis, cadastro.nome) != -1) {
-            cout << "\nEste combustível já está cadastrado!\n\n";
-            system("pause");
-            return;
+        int indice = BuscaCombustivel(combustiveis, cadastro.nome);
+        if (indice != -1){
+            system("cls");
+            cout << "Combustível Já Cadastrado. \n\nDesejar Tentar Outro Combustívels ? (S/N): ";
+            cin >> op;
+            VerificarSim_Nao(op);
+            if (toupper(op) == 'S') continue;
+            else return;
         }
 
-        cout << "Digite o preço por Litro: R$ ";
-        cin >> cadastro.precoPorLitro;
-        cout << "Capacidade Tanque: ";
-        cin >> cadastro.capacidadeTanque;
-        cout << "Digite a quantidade inicial em estoque (Litros): ";
-        cin >> cadastro.estoqueLitros;
+        cadastro.precoPorLitro = lerFlutuanteValido("Digite o preço por Litro: R$ ");
+        cadastro.capacidadeTanque = lerFlutuanteValido("Capacidade Tanque: ");
+        cadastro.estoqueLitros = lerFlutuanteValido("Digite a quantidade inicial em estoque (Litros): ");
 
         if (cadastro.estoqueLitros > cadastro.capacidadeTanque) {
             system("cls");
             cout << "Estoque Acima da Capacidade do Tanque\n\n";
-            cout << "Digite a quantidade inicial em estoque (Litros): ";
-            cin >> cadastro.estoqueLitros;
+            cadastro.estoqueLitros = lerFlutuanteValido("Digite a quantidade inicial em estoque (Litros): ");
         }
 
         cout << "\n\nDeseja confirmar o cadastro? (S/N): ";
@@ -450,8 +471,7 @@ void AtualizarPreco(vector<Combustivel>& combustiveis) {
                 << ": R$ " << fixed << setprecision(2) << combustiveis[indice].precoPorLitro << "\n";
 
             double novoPreco;
-            cout << "Digite o novo preço por litro: R$ ";
-            cin >> novoPreco;
+            novoPreco = lerFlutuanteValido("Digite o novo preço por litro: R$ ");
 
             combustiveis[indice].precoPorLitro = novoPreco;
             SalvarCombustiveis(combustiveis);
@@ -477,7 +497,7 @@ void AddEstoqueCombustivel(vector<Combustivel> &combustiveis) {
         system("cls");
         cout << "================== ENTRADA DE ESTOQUE ===================\n\n";
         cout << "Qual Combustível Deseja Inserir Estoque ? (Ex. Etanol): ";
-        cin.ignore();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
         getline(cin, nome);
 
         int indice = BuscaCombustivel(combustiveis, nome);
@@ -486,8 +506,7 @@ void AddEstoqueCombustivel(vector<Combustivel> &combustiveis) {
                 << ": " << fixed << setprecision(2) << combustiveis[indice].estoqueLitros;
 
             double addEstoque;
-            cout << "\nDigite Quantidade Para Estoque: ";
-            cin >> addEstoque;
+            addEstoque = lerFlutuanteValido("\nDigite Quantidade Para Estoque: ");
 
             combustiveis[indice].estoqueLitros += addEstoque;
             SalvarCombustiveis(combustiveis);
@@ -512,7 +531,7 @@ void ExcluirCombustivel(vector<Combustivel>& combustiveis) {
         system("cls");
         cout << "==================== EXCLUIR COMBUSTÍVEL =======================\n\n";
         cout << "Qual combustível Deseja Excluir ? (Ex. Etanol): ";
-        cin.ignore();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
         getline(cin, nome);
         transform(nome.begin(), nome.end(), nome.begin(), ::toupper);
 
@@ -706,7 +725,7 @@ void CadastrarProduto(vector<ProdutoLoja>& produto) {
         int indice = BuscaProduto(produto, cadastro.id);
         if (indice != -1) {
             system("cls");
-            cout << "Código Já Cadastrado. Deseja tentar outro código? (S/N): ";
+            cout << "Código Já Cadastrado. \n\nDeseja tentar outro código? (S/N): ";
             cin >> op;
             VerificarSim_Nao(op);
             if (toupper(op) == 'S') continue;
@@ -716,8 +735,7 @@ void CadastrarProduto(vector<ProdutoLoja>& produto) {
         cout << "Nome do Produto (Ex. Água): ";
         getline(cin, cadastro.nome);
         transform(cadastro.nome.begin(), cadastro.nome.end(), cadastro.nome.begin(), ::toupper);
-        cout << "Preço Unitário: ";
-        cin >> cadastro.precoUnitario;
+        cadastro.precoUnitario = lerFlutuanteValido("Preço Unitário: ");
         cadastro.quantEstoque = lerInteiroValido("Estoque Inicial: ");
 
         cout << "\n\nDeseja Confirmar Cadastro ? (S/N): ";
@@ -785,8 +803,7 @@ void AtualizarPrecoProduto(vector<ProdutoLoja>& produto) {
             cout << "\nPreço Atual: R$ " << fixed << setprecision(2) << produto[indice].precoUnitario;
 
             double novopreco;
-            cout << "\n\nDigite o Preço Atual: ";
-            cin >> novopreco;
+            novopreco = lerFlutuanteValido("\n\nDigite o Preço Atual: ");
 
             produto[indice].precoUnitario = novopreco;
             SalvarProduto(produto);
@@ -1021,11 +1038,12 @@ void CadastrarCliente(vector<Clientes>& cliente) {
         getline(cin, cadastro.cpf);
         cout << "Contato: ";
         getline(cin, cadastro.contato);
-        cout << "Saldo Inicial: R$ ";
-        cin >> cadastro.saldoDevedor;
+        cadastro.saldoDevedor = lerFlutuanteValido("Saldo Inicial: R$ ");
 
         cout << "\nDeseja Confirmar Cadastro ? (S/N): ";
         cin >> confirmar;
+        VerificarSim_Nao(confirmar);
+
         if (toupper(confirmar) == 'S') {
             cliente.push_back(cadastro);
             SalvarCliente(cliente);
@@ -1208,16 +1226,14 @@ void RegistrarPagamentoCliente(vector<Clientes>& cliente) {
                 << fixed << setprecision(2) << cliente[indice].saldoDevedor << endl;
             cout << "----------------------------------------------------------\n";
 
-            cout << "\nDigite o Valor do Pagamento: R$ ";
-            cin >> valorPagamento;
+            valorPagamento = lerFlutuanteValido("\nDigite o Valor do Pagamento: R$ ");
 
             while (valorPagamento < 0 || round(valorPagamento * 100.0) > round(cliente[indice].saldoDevedor * 100.0)) {
                 system("cls");
                 cout << "============= REGISTRAR PAGAMENTO DE DÍVIDA ===============\n\n";
                 cout << "Erro, valor inválido, negativo ou maior que o saldo devedor!\n\n";
                 cout << "Saldo Devedor Atual: R$ " << fixed << setprecision(2) << cliente[indice].saldoDevedor << endl;
-                cout << "\nDigite o Valor do Pagamento: R$ ";
-                cin >> valorPagamento;
+                valorPagamento = lerFlutuanteValido("\nDigite o Valor do Pagamento: R$ ");
             }
 
             cout << "\n\nDeseja Confirmar ? (S/N): ";
@@ -1383,8 +1399,7 @@ void NovaVenda(vector<Combustivel>& combustivel, vector<ProdutoLoja>& produto, v
                 int indice = BuscaCombustivel(combustivel, nomeCombustivel);
                 if (indice != -1) {
                     double litros;
-                    cout << "Digite a Quatidade em Litros: ";
-                    cin >> litros;
+                    litros = lerFlutuanteValido("Digite a Quatidade em Litros: ");
 
                     if (litros > 0 && combustivel[indice].estoqueLitros >= litros) {
                         Venda novaVenda;
