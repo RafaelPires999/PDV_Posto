@@ -1403,8 +1403,9 @@ void NovaVenda(vector<Combustivel>& combustivel, vector<ProdutoLoja>& produto, v
 
                 int indice = BuscaProduto(produto, idProduto);
                 if (indice != -1) {
+                    cout << "\nProduto: " << produto[indice].nome;
                     int quantidade;
-                    cout << "Digite Quantidade: ";
+                    cout << "\nDigite Quantidade: ";
                     cin >> quantidade;
 
                     if (quantidade > 0 && produto[indice].quantEstoque >= quantidade) {
@@ -1436,8 +1437,6 @@ void NovaVenda(vector<Combustivel>& combustivel, vector<ProdutoLoja>& produto, v
         else if (op != 0) {
             cout << "\nOpção Inválida\n";
         }
-        if (op == 1 || op == 2 || op != 0)
-            system("pause");
 
     } while (op != 0);
 
