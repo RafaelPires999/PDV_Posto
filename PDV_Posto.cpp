@@ -239,7 +239,7 @@ void VerificarSim_Nao(char &confirmar) {
     while (toupper(confirmar) != 'S' && toupper(confirmar) != 'N') {
         system("cls");
         cout << "Dígito Inválido\n\n";
-        cout << "Dígite (S/N): ";
+        cout << "Dígite Novamente (S/N): ";
         cin >> confirmar;
         system("cls");
     }
@@ -264,8 +264,8 @@ void SalvarCombustiveis(const vector<Combustivel>& combustiveis) {
         fwrite(&nomeLen, sizeof(size_t), 1, arquivo);
         fwrite(c.nome.c_str(), sizeof(char), nomeLen, arquivo);
         fwrite(&c.precoPorLitro, sizeof(double), 1, arquivo);
-        fwrite(&c.estoqueLitros, sizeof(double), 1, arquivo);
         fwrite(&c.capacidadeTanque, sizeof(double), 1, arquivo);
+        fwrite(&c.estoqueLitros, sizeof(double), 1, arquivo);
     }
     fclose(arquivo);
 }
@@ -286,8 +286,8 @@ void CarregarCombustiveis(vector<Combustivel>& combustiveis) {
         c.nome.resize(nomeLen);
         fread(&c.nome[0], sizeof(char), nomeLen, arquivo);
         fread(&c.precoPorLitro, sizeof(double), 1, arquivo);
-        fread(&c.estoqueLitros, sizeof(double), 1, arquivo);
         fread(&c.capacidadeTanque, sizeof(double), 1, arquivo);
+        fread(&c.estoqueLitros, sizeof(double), 1, arquivo);
         combustiveis.push_back(c);
     }
     fclose(arquivo);
@@ -377,10 +377,17 @@ void CadastrarCombustivel(vector<Combustivel>& combustiveis) {
 
         cout << "Digite o preço por Litro: R$ ";
         cin >> cadastro.precoPorLitro;
-        cout << "Digite a quantidade inicial em estoque (Litros): ";
-        cin >> cadastro.estoqueLitros;
         cout << "Capacidade Tanque: ";
         cin >> cadastro.capacidadeTanque;
+        cout << "Digite a quantidade inicial em estoque (Litros): ";
+        cin >> cadastro.estoqueLitros;
+
+        if (cadastro.estoqueLitros > cadastro.capacidadeTanque) {
+            system("cls");
+            cout << "Estoque Acima da Capacidade do Tanque\n\n";
+            cout << "Digite a quantidade inicial em estoque (Litros): ";
+            cin >> cadastro.estoqueLitros;
+        }
 
         cout << "\n\nDeseja confirmar o cadastro? (S/N): ";
         cin >> confirma;
@@ -1007,6 +1014,8 @@ void CadastrarCliente(vector<Clientes>& cliente) {
         }
         cout << "Deseja Cadastrar Outro Cliente ? (S/N): ";
         cin >> opcao;
+
+        VerificarSim_Nao(opcao);
     } while (toupper(opcao) == 'S');
 }
 
@@ -1056,150 +1065,173 @@ int BuscaClienteNome(const vector<Clientes>& cliente, string nomeCliente) {
 // Excluir Cliente
 void ExcluirCliente(vector<Clientes>& cliente) {
     string nome;
-    char confirmar;
-    system("cls");
-    cout << "===================================== EXCLUIR CLIENTES ======================================\n\n";
-    cout << "Qual Cliente Deseja Excluir ?: ";
-    cin.ignore();
-    getline(cin, nome);
-    transform(nome.begin(), nome.end(), nome.begin(), ::toupper);
+    char confirmar, op;
+    do {
+        system("cls");
+        cout << "===================================== EXCLUIR CLIENTES ======================================\n\n";
+        cout << "Qual Cliente Deseja Excluir ?: ";
+        cin.ignore();
+        getline(cin, nome);
+        transform(nome.begin(), nome.end(), nome.begin(), ::toupper);
 
-    int indice = BuscaClienteNome(cliente, nome);
-    cout << endl;
+        int indice = BuscaClienteNome(cliente, nome);
+        cout << endl;
 
-    if (indice != -1) {
-        cout << left;
-        cout << setw(5) << "ID"
-            << setw(30) << "NOME"
-            << setw(18) << "CPF"
-            << setw(20) << "CONTATO"
-            << "SALDO DEVEDOR" << endl;
-        cout << "---------------------------------------------------------------------------------------------\n\n";
-        cout << setw(5) << cliente[indice].id
-            << setw(30) << cliente[indice].nome
-            << setw(18) << cliente[indice].cpf
-            << setw(20) << cliente[indice].contato
-            << "R$ "
-            << fixed << setprecision(2) << cliente[indice].saldoDevedor << endl;
-        cout << "---------------------------------------------------------------------------------------------\n";
+        if (indice != -1) {
+            cout << left;
+            cout << setw(5) << "ID"
+                << setw(30) << "NOME"
+                << setw(18) << "CPF"
+                << setw(20) << "CONTATO"
+                << "SALDO DEVEDOR" << endl;
+            cout << "---------------------------------------------------------------------------------------------\n\n";
+            cout << setw(5) << cliente[indice].id
+                << setw(30) << cliente[indice].nome
+                << setw(18) << cliente[indice].cpf
+                << setw(20) << cliente[indice].contato
+                << "R$ "
+                << fixed << setprecision(2) << cliente[indice].saldoDevedor << endl;
+            cout << "---------------------------------------------------------------------------------------------\n";
 
-        cout << "\nDeseja Excluir ?(S/N): ";
-        cin >> confirmar;
+            cout << "\nDeseja Excluir ?(S/N): ";
+            cin >> confirmar;
 
-        if (toupper(confirmar) == 'S') {
-            if (cliente[indice].saldoDevedor == 0) {
-                cliente.erase(cliente.begin() + indice);
-                SalvarCliente(cliente);
-                cout << "\nCliente Excluido com Sucesso\n\n";
+            VerificarSim_Nao(confirmar);
+
+            if (toupper(confirmar) == 'S') {
+                if (cliente[indice].saldoDevedor == 0) {
+                    cliente.erase(cliente.begin() + indice);
+                    SalvarCliente(cliente);
+                    cout << "\nCliente Excluido com Sucesso\n\n";
+                }
+                else {
+                    cout << "\nCliente Não Pode Ser Excluido\n\n";
+                    cout << "Saldo Dívida: R$ " << fixed << setprecision(2) << cliente[indice].saldoDevedor << "\n\n";
+                }
             }
             else {
-                cout << "\nCliente Não Pode Ser Excluido\n\n";
-                cout << "Saldo Dívida: R$ " << fixed << setprecision(2) << cliente[indice].saldoDevedor << "\n\n";
+                cout << "\nExclusão Cancelado\n\n";
             }
         }
         else {
-            cout << "\nExclusão Cancelado\n\n";
+            cout << "\Cliente Não Encontrado\n\n";
         }
-    }
-    else {
-        cout << "\Cliente Não Encontrado\n\n";
-    }
-    system("pause");
+
+        cout << "Deseja Excluir Outro Cliente ? (S/N): ";
+        cin >> op;
+
+        VerificarSim_Nao(op);
+    } while (toupper(op) == 'S');
 }
 
 // Consultar Saldo do Cliente
 void consultarSaldo(vector<Clientes>& cliente) {
     string nome;
-    system("cls");
-    cout << "==================== CONSULTAR SALDO =====================\n\n";
-    cout << "Digite o Nome do Cliente: ";
-    cin.ignore();
-    getline(cin, nome);
-    transform(nome.begin(), nome.end(), nome.begin(), ::toupper);
+    char confirmar;
+    do {
+        system("cls");
+        cout << "==================== CONSULTAR SALDO =====================\n\n";
+        cout << "Digite o Nome do Cliente: ";
+        cin.ignore();
+        getline(cin, nome);
+        transform(nome.begin(), nome.end(), nome.begin(), ::toupper);
 
-    cout << "\n\n";
-    int indice = BuscaClienteNome(cliente, nome);
-    if (indice != -1) {
-        cout << left;
-        cout << setw(5) << "ID"
-            << setw(30) << "NOME"
-            << "SALDO DEVEDOR" << endl;
-        cout << "----------------------------------------------------------\n\n";
-        cout << setw(5) << cliente[indice].id
-            << setw(30) << cliente[indice].nome
-            << "R$ "
-            << fixed << setprecision(2) << cliente[indice].saldoDevedor << endl;
-        cout << "----------------------------------------------------------\n";
-    }
-    else {
-        cout << "Cliente Não Encontrado\n\n";
-    }
-    system("pause");
+        cout << "\n\n";
+        int indice = BuscaClienteNome(cliente, nome);
+        if (indice != -1) {
+            cout << left;
+            cout << setw(5) << "ID"
+                << setw(30) << "NOME"
+                << "SALDO DEVEDOR" << endl;
+            cout << "----------------------------------------------------------\n\n";
+            cout << setw(5) << cliente[indice].id
+                << setw(30) << cliente[indice].nome
+                << "R$ "
+                << fixed << setprecision(2) << cliente[indice].saldoDevedor << endl;
+            cout << "----------------------------------------------------------\n";
+        }
+        else {
+            cout << "Cliente Não Encontrado\n\n";
+        }
+
+        cout << "Deseja Consultar Saldo de Outro Cliente ? (S/N): ";
+        cin >> confirmar;
+
+        VerificarSim_Nao(confirmar);
+    } while (toupper(confirmar) == 'S');
 }
 
 // Registrar Pagamento Cliente
 void RegistrarPagamentoCliente(vector<Clientes>& cliente) {
     string nome;
-    char confirmar;
+    char confirmar, op;
     double valorPagamento = 0.0;
-    system("cls");
-    cout << "============= REGISTRAR PAGAMENTO DE DÍVIDA ===============\n\n";
-    cout << "Digite o Nome do Cliente: ";
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-    getline(cin, nome);
-    transform(nome.begin(), nome.end(), nome.begin(), ::toupper);
+    do {
+        system("cls");
+        cout << "============= REGISTRAR PAGAMENTO DE DÍVIDA ===============\n\n";
+        cout << "Digite o Nome do Cliente: ";
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        getline(cin, nome);
+        transform(nome.begin(), nome.end(), nome.begin(), ::toupper);
 
-    cout << "\n\n";
-    int indice = BuscaClienteNome(cliente, nome);
-    if (indice != -1) {
-        cout << left;
-        cout << setw(5) << "ID"
-            << setw(30) << "NOME"
-            << "SALDO DEVEDOR" << endl;
-        cout << "----------------------------------------------------------\n\n";
-        cout << setw(5) << cliente[indice].id
-            << setw(30) << cliente[indice].nome
-            << "R$ "
-            << fixed << setprecision(2) << cliente[indice].saldoDevedor << endl;
-        cout << "----------------------------------------------------------\n";
+        cout << "\n\n";
+        int indice = BuscaClienteNome(cliente, nome);
+        if (indice != -1) {
+            cout << left;
+            cout << setw(5) << "ID"
+                << setw(30) << "NOME"
+                << "SALDO DEVEDOR" << endl;
+            cout << "----------------------------------------------------------\n\n";
+            cout << setw(5) << cliente[indice].id
+                << setw(30) << cliente[indice].nome
+                << "R$ "
+                << fixed << setprecision(2) << cliente[indice].saldoDevedor << endl;
+            cout << "----------------------------------------------------------\n";
 
-        cout << "\nDigite o Valor do Pagamento: R$ ";
-        cin >> valorPagamento;
-
-        while (valorPagamento < 0 || round(valorPagamento * 100.0) > round(cliente[indice].saldoDevedor * 100.0)) {
-            system("cls");
-            cout << "============= REGISTRAR PAGAMENTO DE DÍVIDA ===============\n\n";
-            cout << "Erro, valor inválido, negativo ou maior que o saldo devedor!\n\n";
-            cout << "Saldo Devedor Atual: R$ " << fixed << setprecision(2) << cliente[indice].saldoDevedor << endl;
             cout << "\nDigite o Valor do Pagamento: R$ ";
             cin >> valorPagamento;
-        }
 
-        cout << "\n\nDeseja Confirmar ? (S/N): ";
-        cin >> confirmar;
+            while (valorPagamento < 0 || round(valorPagamento * 100.0) > round(cliente[indice].saldoDevedor * 100.0)) {
+                system("cls");
+                cout << "============= REGISTRAR PAGAMENTO DE DÍVIDA ===============\n\n";
+                cout << "Erro, valor inválido, negativo ou maior que o saldo devedor!\n\n";
+                cout << "Saldo Devedor Atual: R$ " << fixed << setprecision(2) << cliente[indice].saldoDevedor << endl;
+                cout << "\nDigite o Valor do Pagamento: R$ ";
+                cin >> valorPagamento;
+            }
 
-        if (toupper(confirmar) == 'S') {
-            long long saldoDevedorCentavos = round(cliente[indice].saldoDevedor * 100.0);
-            long long valorPagamentoCentavos = round(valorPagamento * 100.0);
+            cout << "\n\nDeseja Confirmar ? (S/N): ";
+            cin >> confirmar;
 
-            saldoDevedorCentavos -= valorPagamentoCentavos;
+            VerificarSim_Nao(confirmar);
 
-            cliente[indice].saldoDevedor = saldoDevedorCentavos / 100.0;
+            if (toupper(confirmar) == 'S') {
+                long long saldoDevedorCentavos = round(cliente[indice].saldoDevedor * 100.0);
+                long long valorPagamentoCentavos = round(valorPagamento * 100.0);
 
-            SalvarCliente(cliente);
-            cout << "\nPagamento Efetuado Com Sucesso\n";
+                saldoDevedorCentavos -= valorPagamentoCentavos;
 
-            cout << "Novo Saldo Devedor: R$ " << cliente[indice].saldoDevedor;
-            cout << "\n\n";
+                cliente[indice].saldoDevedor = saldoDevedorCentavos / 100.0;
+
+                SalvarCliente(cliente);
+                cout << "\nPagamento Efetuado Com Sucesso\n";
+
+                cout << "Novo Saldo Devedor: R$ " << cliente[indice].saldoDevedor;
+                cout << "\n\n";
+            }
+            else {
+                cout << "\nPagamento Cancelado\n\n";
+            }
         }
         else {
-            cout << "\nPagamento Cancelado\n\n";
+            cout << "Nenhum Cliente Encontrado\n\n";
         }
-    }
-    else {
-        cout << "Nenhum Cliente Encontrado\n\n";
-    }
-    system("pause");
+
+        cout << "Deseja Registrar Outro Pagamento ? (S/N): ";
+        cin >> op;
+
+        VerificarSim_Nao(op);
+    } while (toupper(op) == 'S');
 }
 
 
@@ -1319,71 +1351,87 @@ void NovaVenda(vector<Combustivel>& combustivel, vector<ProdutoLoja>& produto, v
 
         if (op == 1) {
             string nomeCombustivel;
-            system("cls");
-            cout << "=================== COMBUSTÍVEL ====================\n\n";
-            cout << "Digite Tipo Combustível (Ex. Etanol): ";
-            cin.ignore();
-            getline(cin, nomeCombustivel);
-            transform(nomeCombustivel.begin(), nomeCombustivel.end(), nomeCombustivel.begin(), ::toupper);
+            char confirmar;
+            do {
+                system("cls");
+                cout << "=================== COMBUSTÍVEL ====================\n\n";
+                cout << "Digite Tipo Combustível (Ex. Etanol): ";
+                cin.ignore();
+                getline(cin, nomeCombustivel);
+                transform(nomeCombustivel.begin(), nomeCombustivel.end(), nomeCombustivel.begin(), ::toupper);
 
-            int indice = BuscaCombustivel(combustivel, nomeCombustivel);
-            if (indice != -1) {
-                double litros;
-                cout << "Digite a Quatidade em Litros: ";
-                cin >> litros;
+                int indice = BuscaCombustivel(combustivel, nomeCombustivel);
+                if (indice != -1) {
+                    double litros;
+                    cout << "Digite a Quatidade em Litros: ";
+                    cin >> litros;
 
-                if (litros > 0 && combustivel[indice].estoqueLitros >= litros) {
-                    Venda novaVenda;
-                    novaVenda.tipo = Venda::COMBUSTIVEL;
-                    novaVenda.nomeItem = combustivel[indice].nome;
-                    novaVenda.quantVendido = litros;
-                    novaVenda.valorTotal = litros * combustivel[indice].precoPorLitro;
+                    if (litros > 0 && combustivel[indice].estoqueLitros >= litros) {
+                        Venda novaVenda;
+                        novaVenda.tipo = Venda::COMBUSTIVEL;
+                        novaVenda.nomeItem = combustivel[indice].nome;
+                        novaVenda.quantVendido = litros;
+                        novaVenda.valorTotal = litros * combustivel[indice].precoPorLitro;
 
-                    itemVenda.push_back(novaVenda);
-                    totalVenda += novaVenda.valorTotal;
-                    combustivel[indice].estoqueLitros -= litros;
-                    cout << "\nItem Adicionado\n\n";
+                        itemVenda.push_back(novaVenda);
+                        totalVenda += novaVenda.valorTotal;
+                        combustivel[indice].estoqueLitros -= litros;
+                        cout << "\nItem Adicionado\n\n";
+                    }
+                    else {
+                        cout << "\nEstoque Insuficiente ou Quantidade Inválida\n\n";
+                    }
                 }
                 else {
-                    cout << "\nEstoque Insuficiente ou Quantidade Inválida\n\n";
+                    cout << "\nCombustível Não Encontrado\n\n";
                 }
-            }
-            else {
-                cout << "\nCombustível Não Encontrado\n\n";
-            }
+
+                cout << "Deseja Adicionar Outro Combustível ? (S/N): ";
+                cin >> confirmar;
+
+                VerificarSim_Nao(confirmar);
+            } while (toupper(confirmar) == 'S');
         }
         else if (op == 2) {
             int idProduto;
-            system("cls");
-            cout << "=============== PRODUTOS DA LOJA =================\n\n";
-            cout << "Digite o código do Produto: ";
-            cin >> idProduto;
+            char confirmar;
+            do {
+                system("cls");
+                cout << "=============== PRODUTOS DA LOJA =================\n\n";
+                cout << "Digite o código do Produto: ";
+                cin >> idProduto;
 
-            int indice = BuscaProduto(produto, idProduto);
-            if (indice != -1) {
-                int quantidade;
-                cout << "Digite Quantidade: ";
-                cin >> quantidade;
+                int indice = BuscaProduto(produto, idProduto);
+                if (indice != -1) {
+                    int quantidade;
+                    cout << "Digite Quantidade: ";
+                    cin >> quantidade;
 
-                if (quantidade > 0 && produto[indice].quantEstoque >= quantidade) {
-                    Venda novaVenda;
-                    novaVenda.tipo = Venda::PRODUTO;
-                    novaVenda.nomeItem = produto[indice].nome;
-                    novaVenda.quantVendido = quantidade;
-                    novaVenda.valorTotal = quantidade * produto[indice].precoUnitario;
+                    if (quantidade > 0 && produto[indice].quantEstoque >= quantidade) {
+                        Venda novaVenda;
+                        novaVenda.tipo = Venda::PRODUTO;
+                        novaVenda.nomeItem = produto[indice].nome;
+                        novaVenda.quantVendido = quantidade;
+                        novaVenda.valorTotal = quantidade * produto[indice].precoUnitario;
 
-                    itemVenda.push_back(novaVenda);
-                    totalVenda += novaVenda.valorTotal;
-                    produto[indice].quantEstoque -= quantidade;
-                    cout << "\nItem Adicionado\n";
+                        itemVenda.push_back(novaVenda);
+                        totalVenda += novaVenda.valorTotal;
+                        produto[indice].quantEstoque -= quantidade;
+                        cout << "\nItem Adicionado\n\n";
+                    }
+                    else {
+                        cout << "Estoque Insuficiente ou Quantidade Inválida\n\n";
+                    }
                 }
                 else {
-                    cout << "\nEstoque Insuficiente ou Quantidade Inválida\n";
+                    cout << "Produto Não Encontrado\n\n";
                 }
-            }
-            else {
-                cout << "\nProduto Não Encontrado\n";
-            }
+
+                cout << "Deseja Adicionar Outro Produto ? (S/N): ";
+                cin >> confirmar;
+
+                VerificarSim_Nao(confirmar);
+            } while (toupper(confirmar) == 'S');
         }
         else if (op != 0) {
             cout << "\nOpção Inválida\n";
@@ -1435,6 +1483,8 @@ void NovaVenda(vector<Combustivel>& combustivel, vector<ProdutoLoja>& produto, v
                 
                 cout << "Deseja Confirmar ?(S/N): ";
                 cin >> confirmar;
+
+                VerificarSim_Nao(confirmar);
 
                 if (toupper(confirmar) == 'S') {
                     cliente[indice].saldoDevedor += totalVenda;
@@ -1545,6 +1595,7 @@ void FecharCaixa(vector<Venda>& vendas, vector<Combustivel>& combustiveis, vecto
     cout << "Deseja Realmente Fechar o Caixar ? (S/N): ";
     cin >> confirmar;
 
+    VerificarSim_Nao(confirmar);
     if (toupper(confirmar) == 'S') {
         cout << "\nFechamento com Sucesso\n\n";
         fechamentoCaixa novoFechamento;
