@@ -74,6 +74,7 @@ void ImprimirDataHoraAtual();
 void VerificarSim_Nao(char& confirmar);
 int lerInteiroValido(const string& mensagem);
 double lerFlutuanteValido(const string& mensagem);
+string lerStringNaoVazio(const string& mensagem);
 
 // Funções de Combustível
 void GerenciarCombustivel(vector<Combustivel>& combustiveis);
@@ -288,6 +289,26 @@ double lerFlutuanteValido(const string& mensagem) {
     }
 }
 
+// Verificar Campo Vazio em String
+string lerStringNaoVazio(const string& mensagem) {
+    string texto;
+    while (true) {
+        cout << mensagem;
+        if (!getline(cin, texto)) {
+            cin.clear();
+            texto.clear();
+        }
+
+        size_t inicio = texto.find_first_not_of(" \t\r\n");
+        if (inicio == string::npos) {
+            system("cls");
+            cout << "Entrada inválida. Campo não pode ser vazio\n\n";
+            continue;
+        }
+        size_t fim = texto.find_last_not_of(" \t\r\n");
+        return texto.substr(inicio, fim - inicio + 1);
+    }
+}
 
 // ==================== Funções de Combustível ====================
 
@@ -401,21 +422,19 @@ int BuscaCombustivel(const vector<Combustivel>& combustiveis, const string& nome
 // Cadastra um novo combustível
 void CadastrarCombustivel(vector<Combustivel>& combustiveis) {
     Combustivel cadastro;
-    char confirma;
-    char op;
+    char confirma, op;
 
     do {
         system("cls");
-        cin.ignore();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
         cout << "======== CADASTRAR NOVO COMBUSTÍVEL ========\n\n";
-        cout << "Digite o nome do Combustível (Ex. Etanol): ";
-        getline(cin, cadastro.nome);
+        cadastro.nome = lerStringNaoVazio("Digite o nome do Combustível (Ex. Etanol): ");
         transform(cadastro.nome.begin(), cadastro.nome.end(), cadastro.nome.begin(), ::toupper);
 
         int indice = BuscaCombustivel(combustiveis, cadastro.nome);
         if (indice != -1){
             system("cls");
-            cout << "Combustível Já Cadastrado. \n\nDesejar Tentar Outro Combustívels ? (S/N): ";
+            cout << "Combustível Já Cadastrado. \n\nDesejar Tentar Outro Combustível ? (S/N): ";
             cin >> op;
             VerificarSim_Nao(op);
             if (toupper(op) == 'S') continue;
@@ -459,10 +478,10 @@ void AtualizarPreco(vector<Combustivel>& combustiveis) {
     char confirmar;
     do {
         system("cls");
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
         cout << "===================== ATUALIZAR PREÇO =====================\n\n";
-        cout << "Qual combustível deseja atualizar? (Ex. Etanol): ";
-        cin.ignore();
-        getline(cin, nome);
+        nome = lerStringNaoVazio("Qual combustível deseja atualizar? (Ex. Etanol): ");
+        transform(nome.begin(), nome.end(), nome.begin(), ::toupper);
 
         int indice = BuscaCombustivel(combustiveis, nome);
 
@@ -495,10 +514,10 @@ void AddEstoqueCombustivel(vector<Combustivel> &combustiveis) {
     char confirmar;
     do {
         system("cls");
-        cout << "================== ENTRADA DE ESTOQUE ===================\n\n";
-        cout << "Qual Combustível Deseja Inserir Estoque ? (Ex. Etanol): ";
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        getline(cin, nome);
+        cout << "================== ENTRADA DE ESTOQUE ===================\n\n";
+        nome = lerStringNaoVazio("Qual Combustível Deseja Inserir Estoque ? (Ex. Etanol): ");
+        transform(nome.begin(), nome.end(), nome.begin(), ::toupper);
 
         int indice = BuscaCombustivel(combustiveis, nome);
         if (indice != -1) {
@@ -529,10 +548,9 @@ void ExcluirCombustivel(vector<Combustivel>& combustiveis) {
     char confirmar, op;
     do {
         system("cls");
-        cout << "==================== EXCLUIR COMBUSTÍVEL =======================\n\n";
-        cout << "Qual combustível Deseja Excluir ? (Ex. Etanol): ";
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        getline(cin, nome);
+        cout << "==================== EXCLUIR COMBUSTÍVEL =======================\n\n";
+        nome = lerStringNaoVazio("Qual combustível Deseja Excluir ? (Ex. Etanol): ");
         transform(nome.begin(), nome.end(), nome.begin(), ::toupper);
 
         int indice = BuscaCombustivel(combustiveis, nome);
@@ -732,9 +750,10 @@ void CadastrarProduto(vector<ProdutoLoja>& produto) {
             else return;
         }
 
-        cout << "Nome do Produto (Ex. Água): ";
-        getline(cin, cadastro.nome);
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cadastro.nome = lerStringNaoVazio("Nome do Produto (Ex. Água): ");
         transform(cadastro.nome.begin(), cadastro.nome.end(), cadastro.nome.begin(), ::toupper);
+
         cadastro.precoUnitario = lerFlutuanteValido("Preço Unitário: ");
         cadastro.quantEstoque = lerInteiroValido("Estoque Inicial: ");
 
@@ -1030,14 +1049,13 @@ void CadastrarCliente(vector<Clientes>& cliente) {
         cout << "=================== CADASTRAR CLIENTE ====================\n\n";
         cout << "ID Cliente: " << id;
         cadastro.id = id;
-        cout << "\nNome: ";
-        cin.ignore();
-        getline(cin, cadastro.nome);
+
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cadastro.nome = lerStringNaoVazio("\nNome: ");
         transform(cadastro.nome.begin(), cadastro.nome.end(), cadastro.nome.begin(), ::toupper);
-        cout << "CPF: ";
-        getline(cin, cadastro.cpf);
-        cout << "Contato: ";
-        getline(cin, cadastro.contato);
+
+        cadastro.cpf = lerStringNaoVazio("CPF: ");
+        cadastro.contato = lerStringNaoVazio("Contato: ");
         cadastro.saldoDevedor = lerFlutuanteValido("Saldo Inicial: R$ ");
 
         cout << "\nDeseja Confirmar Cadastro ? (S/N): ";
@@ -1106,10 +1124,9 @@ void ExcluirCliente(vector<Clientes>& cliente) {
     char confirmar, op;
     do {
         system("cls");
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
         cout << "===================================== EXCLUIR CLIENTES ======================================\n\n";
-        cout << "Qual Cliente Deseja Excluir ?: ";
-        cin.ignore();
-        getline(cin, nome);
+        nome = lerStringNaoVazio("Qual Cliente Deseja Excluir ?: ");
         transform(nome.begin(), nome.end(), nome.begin(), ::toupper);
 
         int indice = BuscaClienteNome(cliente, nome);
@@ -1168,10 +1185,9 @@ void consultarSaldo(vector<Clientes>& cliente) {
     char confirmar;
     do {
         system("cls");
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
         cout << "==================== CONSULTAR SALDO =====================\n\n";
-        cout << "Digite o Nome do Cliente: ";
-        cin.ignore();
-        getline(cin, nome);
+        nome = lerStringNaoVazio("Digite o Nome do Cliente: ");
         transform(nome.begin(), nome.end(), nome.begin(), ::toupper);
 
         cout << "\n\n";
@@ -1206,10 +1222,9 @@ void RegistrarPagamentoCliente(vector<Clientes>& cliente) {
     double valorPagamento = 0.0;
     do {
         system("cls");
-        cout << "============= REGISTRAR PAGAMENTO DE DÍVIDA ===============\n\n";
-        cout << "Digite o Nome do Cliente: ";
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        getline(cin, nome);
+        cout << "============= REGISTRAR PAGAMENTO DE DÍVIDA ===============\n\n";
+        nome = lerStringNaoVazio("Digite o Nome do Cliente: ");
         transform(nome.begin(), nome.end(), nome.begin(), ::toupper);
 
         cout << "\n\n";
@@ -1390,10 +1405,9 @@ void NovaVenda(vector<Combustivel>& combustivel, vector<ProdutoLoja>& produto, v
             char confirmar;
             do {
                 system("cls");
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
                 cout << "=================== COMBUSTÍVEL ====================\n\n";
-                cout << "Digite Tipo Combustível (Ex. Etanol): ";
-                cin.ignore();
-                getline(cin, nomeCombustivel);
+                nomeCombustivel = lerStringNaoVazio("Digite Tipo Combustível (Ex. Etanol): ");
                 transform(nomeCombustivel.begin(), nomeCombustivel.end(), nomeCombustivel.begin(), ::toupper);
 
                 int indice = BuscaCombustivel(combustivel, nomeCombustivel);
